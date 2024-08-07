@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Search Mini App</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--tg-theme-hint-color, #cccccc);
+            background-color: var(--tg-theme-secondary-bg-color, #f0f0f0);
+            color: var(--tg-theme-text-color, #000000);
+        }
+        button {
+            background-color: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        #error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Amazon Search</h1>
+        <input type="text" id="searchInput" placeholder="Enter your search query">
+        <button onclick="performSearch()">Search</button>
+        <div id="results"></div>
+        <div id="error"></div>
+    </div>
+
+    <script>
+        let tg = window.Telegram?.WebApp;
+
+        function showError(message) {
+            document.getElementById('error').textContent = message;
+        }
+
+        if (tg) {
+            tg.ready();
+        } else {
+            showError("Telegram WebApp is not available. Make sure you're running this in the Telegram client.");
+        }
+
+        function performSearch() {
+            const searchQuery = document.getElementById('searchInput').value;
+            const encodedQuery = encodeURIComponent(searchQuery);
+            const apiUrl = `https://data.unwrangle.com/api/getter/?platform=amazon_search&search=${encodedQuery}&country_code=es&page=1&api_key=56a5d0a6c82510ea2c9966dc7d297353443d1531`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    displayResults(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('An error occurred while fetching results.');
+                });
+        }
+
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (data && data.length > 0) {
+                const ul = document.createElement('ul');
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = `${item.title} - ${item.price}`;
+                    ul.appendChild(li);
+                });
+                resultsDiv.appendChild(ul);
+            } else {
+                resultsDiv.innerHTML = 'No results found.';
+            }
+        }
+
+        // Optional: Use Telegram's theme
+        if (tg) {
+            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+            document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+        }
+    </script>
+</body>
+</html>
