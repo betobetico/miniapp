@@ -32,12 +32,11 @@
             padding: 10px 20px;
             cursor: pointer;
         }
-        #results {
+        #results, #error {
             margin-top: 20px;
         }
         #error {
             color: red;
-            margin-top: 10px;
         }
     </style>
 </head>
@@ -65,34 +64,16 @@
 
         function performSearch() {
             const searchQuery = document.getElementById('searchInput').value;
-            const encodedQuery = encodeURIComponent(searchQuery);
-            const apiUrl = `https://data.unwrangle.com/api/getter/?platform=amazon_search&search=${encodedQuery}&country_code=es&page=1&api_key=56a5d0a6c82510ea2c9966dc7d297353443d1531`;
+            if (!searchQuery) {
+                showError("Please enter a search query.");
+                return;
+            }
 
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    displayResults(data);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showError('An error occurred while fetching results.');
-                });
-        }
-
-        function displayResults(data) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-
-            if (data && data.length > 0) {
-                const ul = document.createElement('ul');
-                data.forEach(item => {
-                    const li = document.createElement('li');
-                    li.textContent = `${item.title} - ${item.price}`;
-                    ul.appendChild(li);
-                });
-                resultsDiv.appendChild(ul);
+            if (tg && tg.sendData) {
+                tg.sendData(JSON.stringify({action: "search", query: searchQuery}));
+                tg.close();
             } else {
-                resultsDiv.innerHTML = 'No results found.';
+                showError("Unable to send data to the bot. Make sure you're using this Mini App within Telegram.");
             }
         }
 
