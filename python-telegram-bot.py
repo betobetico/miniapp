@@ -19,7 +19,7 @@ def handle_webapp_data(update, context):
         update.effective_message.reply_text(message)
 
 def main():
-    updater = Updater("YOUR_BOT_TOKEN", use_context=True)
+    updater = Updater("7445274552:AAHUZvvsiG0EkeiZuI10jWhUcYSCMbudOwQ", use_context=True)
     dp = updater.dispatcher
     dp.add_handler(MessageHandler(Filters.status_update.web_app_data, handle_webapp_data))
     updater.start_polling()
